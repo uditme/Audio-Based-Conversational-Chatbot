@@ -1,59 +1,41 @@
-# Audio-Based Conversational Chatbot
+🎙️ Real-Time Voice Chat Application
 
-A real-time audio chat system featuring:
-- **Frontend**: React SPA (single page) for audio capture and playback.
-- **Backend**: FastAPI WebSocket service for VAD, STT, LLM streaming, and TTS.
-- **Persistence**: Django DRF service for session management and transcripts.
-- **AI**: Gemini (LLM), Whisper (STT), Coqui (TTS) [Swappable adapters].
+A real-time voice chat system using Vosk (STT), Gemini 2.5 LLM, FastAPI, Django, and Docker.
 
-## Architecture
+📺 Project Explanation Video:
+https://drive.google.com/drive/folders/10aEoJShgRXxKXVTMobaxA-ItOY42td93?usp=drive_link
 
-1. **Frontend** streams audio (blob/chunks) to **FastAPI**.
-2. **FastAPI** decodes to PCM16, runs VAD (Voice Activity Detection).
-3. On speech: **STT** (Whisper) transcribes partially.
-4. On silence: **STT** finalizes, sends to **Django** for storage.
-5. **FastAPI** drives **LLM** (Gemini) with the transcript.
-6. **LLM** tokens are buffered and sent to **TTS** (Coqui/Dummy).
-7. **TTS** audio chunks are streamed back to **Frontend** for playback.
+⚠️ Important
 
-## Prerequisites
+The Gemini API key previously used in this project has been deleted
 
-- Docker & Docker Compose
-- Google Gemini API Key (provided in `.env.example`)
+must use own Gemini API key
 
-## Setup & Run
+The key must support Gemini 2.5+ models
 
-1. **Clone & Config**:
-   ```bash
-   cp .env.example .env
-   # Edit .env if needed (GEMINI_API_KEY is pre-filled for this demo)
-   ```
+Docker handles all backend dependencies
 
-2. **Run Services**:
-   ```bash
-   docker-compose up --build
-   ```
+🖥️ Frontend Setup
+cd frontend
+npm install
+npm run dev
 
-3. **Access**:
-   - **Frontend**: (Requires running locally for now, see below)
-   - **Django Admin**: [http://localhost:8000/admin](http://localhost:8000/admin)
-   - **FastAPI**: [http://localhost:8001/docs](http://localhost:8001/docs)
+⚙️ Backend Setup (Docker)
 
-## Running Frontend
+Create environment file:
 
-(Instructions to be added after Frontend scaffolding)
+cp .env.example .env
 
-## Testing
 
-### Integration Test
-1. Ensure services are running.
-2. Run pytest:
-   ```bash
-   pytest tests/
-   ```
+Add your own Gemini API key in .env:
 
-### Manual Play Test
-Use the helper script to simulate a client:
-```bash
-python tests/play_test_audio.py --file tests/sample_16k_mono.wav
-```
+GEMINI_API_KEY=your_gemini_api_key_here
+
+
+Build and start backend:
+
+docker-compose up --build
+
+
+
+END...
