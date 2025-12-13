@@ -1,0 +1,20 @@
+fastapi
+uvicorn
+websockets
+requests
+redis
+webrtcvad
+numpy
+scipy
+# For decoding/audio handling
+av
+# Providers
+openai 
+google-generativeai
+# For TTS if we use a library, or just requests if using API. Coqui usually implies local, but for this simpler task handling it via dummy or API is preferred unless specified.
+# The prompt says: "Implementations: CoquiTTSAdapter (optional) or DummyTTSAdapter"
+# Since Coqui is heavy, we'll implement Dummy and maybe a simple TTS if viable (e.g. gTTS or just dummy).
+# STT
+vosk
+# TTS
+gTTS

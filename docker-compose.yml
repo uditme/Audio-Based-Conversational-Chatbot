@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: audiobot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  django:
+    build:
+      context: ./django_app
+      dockerfile: Dockerfile
+    command: sh -c "python manage.py makemigrations core && python manage.py migrate && uvicorn project.asgi:application --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./django_app:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgrespassword@postgres:5432/audiobot
+      - DJANGO_SECRET_KEY=dev_secret_key
+      - DEBUG=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  fastapi:
+    build:
+      context: ./fastapi_ws
+      dockerfile: Dockerfile
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+    volumes:
+      - ./fastapi_ws:/app
+    ports:
+      - "8001:8001"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DJANGO_INTERNAL_URL=http://django:8000
+      - VAD_MODE=1
+      - STT_INTERVAL_MS=300
+      - TTS_INTERVAL_MS=200
+      - SILENCE_WINDOW_MS=800
+      # Pass through provider keys from .env
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+      django:
+        condition: service_started
+
+volumes:
+  postgres_data:
